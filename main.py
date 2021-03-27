@@ -1,16 +1,36 @@
-# This is a sample Python script.
+"""
+Simple example of PacketGenerator, SwitchPort, and PacketSink from the SimComponents module.
+Creates constant rate packet generator, connects it to a slow switch port, and then
+connects the switch port to a sink. The queue size is made small an the port speed slow
+to verify packet drops.
 
-# Press Shift+F10 to execute it or replace it with your code.
-# Press Double Shift to search everywhere for classes, files, tool windows, actions, and settings.
+Copyright 2014 Dr. Greg M. Bernstein
+Released under the MIT license
+"""
+from random import expovariate
+
+import simpy
+from SimComponents import PacketGenerator, PacketSink, SwitchPort
 
 
-def print_hi(name):
-    # Use a breakpoint in the code line below to debug your script.
-    print(f'Hi, {name}')  # Press Ctrl+F8 to toggle the breakpoint.
+def constArrival():  # Constant arrival distribution for generator 1
+    return 1.0
 
+def constArrival2():
+    return 2.0
 
-# Press the green button in the gutter to run the script.
+def distSize():
+    return 2.0
+
 if __name__ == '__main__':
-    print_hi('PyCharm')
-
-# See PyCharm help at https://www.jetbrains.com/help/pycharm/
+    env = simpy.Environment()  # Create the SimPy environment
+    pg = PacketGenerator(env, "SJSU", constArrival, distSize, finish=5.0)
+    switch_port = SwitchPort(env, rate=2.0, qlimit=300, fifo=False, debug=True)
+    ps = PacketSink(env, debug=True)  # debug: every packet arrival is printed
+    # Wire packet generators and sinks together
+    pg.out = switch_port
+    switch_port.out = ps
+    env.run(until=200)
+    print("waits: {}".format(ps.waits))
+    print("received: {}, dropped {}, sent {}".format(ps.packets_rec,
+         switch_port.packets_drop, pg.packets_sent))

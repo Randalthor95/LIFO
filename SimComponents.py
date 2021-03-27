@@ -4,12 +4,18 @@
     Copyright 2014 Greg M. Bernstein
     Released under the MIT license
 """
+from typing import Optional
+
 import simpy
 import random
 import copy
+
+from simpy import Store
 from simpy.core import BoundClass
 from simpy.resources import base
 from heapq import heappush, heappop
+
+from simpy.resources.store import StorePut, FilterStoreGet, StoreGet
 
 
 class Packet(object):
@@ -31,6 +37,7 @@ class Packet(object):
         flow_id : int
             small integer that can be used to identify a flow
     """
+
     def __init__(self, time, size, id, src="a", dst="z", flow_id=0):
         self.time = time
         self.size = size
@@ -40,7 +47,7 @@ class Packet(object):
         self.flow_id = flow_id
 
     def __repr__(self):
-        return "id: {}, src: {}, time: {}, size: {}".\
+        return "id: {}, src: {}, time: {}, size: {}". \
             format(self.id, self.src, self.time, self.size)
 
 
@@ -63,7 +70,8 @@ class PacketGenerator(object):
 
 
     """
-    def __init__(self, env, id,  adist, sdist, initial_delay=0, finish=float("inf"), flow_id=0):
+
+    def __init__(self, env, id, adist, sdist, initial_delay=0, finish=float("inf"), flow_id=0):
         self.id = id
         self.env = env
         self.adist = adist
@@ -108,6 +116,7 @@ class PacketSink(object):
             used for selective statistics. Default none.
 
     """
+
     def __init__(self, env, rec_arrivals=False, absolute_arrivals=False, rec_waits=True, debug=False, selector=None):
         self.store = simpy.Store(env)
         self.env = env
@@ -139,6 +148,13 @@ class PacketSink(object):
                 print(pkt)
 
 
+class LIFOStore(Store):
+    def _do_get(self, event: StoreGet) -> Optional[bool]:
+        if self.items:
+            event.succeed(self.items.pop())
+        return None
+
+
 class SwitchPort(object):
     """ Models a switch output port with a given rate and buffer size limit in bytes.
         Set the "out" member variable to the entity to receive the packet.
@@ -156,8 +172,12 @@ class SwitchPort(object):
             queue limit will be based on packets.
 
     """
-    def __init__(self, env, rate, qlimit=None, limit_bytes=True, debug=False):
-        self.store = simpy.Store(env)
+
+    def __init__(self, env, rate, qlimit=None, limit_bytes=True, debug=False, fifo=False):
+        if fifo:
+            self.store = simpy.Store(env)
+        else:
+            self.store = LIFOStore(env)
         self.rate = rate
         self.env = env
         self.out = None
@@ -175,7 +195,7 @@ class SwitchPort(object):
             msg = (yield self.store.get())
             self.busy = 1
             self.byte_size -= msg.size
-            yield self.env.timeout(msg.size*8.0/self.rate)
+            yield self.env.timeout(msg.size * 8.0 / self.rate)
             self.out.put(msg)
             self.busy = 0
             if self.debug:
@@ -191,7 +211,7 @@ class SwitchPort(object):
         if self.limit_bytes and tmp_byte_count >= self.qlimit:
             self.packets_drop += 1
             return
-        elif not self.limit_bytes and len(self.store.items) >= self.qlimit-1:
+        elif not self.limit_bytes and len(self.store.items) >= self.qlimit - 1:
             self.packets_drop += 1
         else:
             self.byte_size = tmp_byte_count
@@ -213,6 +233,7 @@ class PortMonitor(object):
             a no parameter function that returns the successive inter-arrival times of the
             packets
     """
+
     def __init__(self, env, port, dist, count_bytes=False):
         self.port = port
         self.env = env
@@ -244,11 +265,12 @@ class RandomBrancher(object):
         probs : List
             list of probabilities for the corresponding output ports
     """
+
     def __init__(self, env, probs):
         self.env = env
 
         self.probs = probs
-        self.ranges = [sum(probs[0:n+1]) for n in range(len(probs))]  # Partial sums of probs
+        self.ranges = [sum(probs[0:n + 1]) for n in range(len(probs))]  # Partial sums of probs
         if self.ranges[-1] - 1.0 > 1.0e-6:
             raise Exception("Probabilities must sum to 1.0")
         self.n_ports = len(self.probs)
@@ -266,29 +288,31 @@ class RandomBrancher(object):
 
 
 class FlowDemux(object):
-        """ A demultiplexing element that splits packet streams by flow_id.
+    """ A demultiplexing element that splits packet streams by flow_id.
 
-        Contains a list of output ports of the same length as the probability list
-        in the constructor.  Use these to connect to other network elements.
+    Contains a list of output ports of the same length as the probability list
+    in the constructor.  Use these to connect to other network elements.
 
-        Parameters
-        ----------
-        outs : List
-            list of probabilities for the corresponding output ports
-    """
-        def __init__(self, outs=None, default=None):
-            self.outs = outs
-            self.default = default
-            self.packets_rec = 0
+    Parameters
+    ----------
+    outs : List
+        list of probabilities for the corresponding output ports
+"""
 
-        def put(self, pkt):
-            self.packets_rec += 1
-            flow_id = pkt.flow_id
-            if flow_id < len(self.outs):
-                self.outs[flow_id].put(pkt)
-            else:
-                if self.default:
-                    self.default.put(pkt)
+    def __init__(self, outs=None, default=None):
+        self.outs = outs
+        self.default = default
+        self.packets_rec = 0
+
+    def put(self, pkt):
+        self.packets_rec += 1
+        flow_id = pkt.flow_id
+        if flow_id < len(self.outs):
+            self.outs[flow_id].put(pkt)
+        else:
+            if self.default:
+                self.default.put(pkt)
+
 
 class TrTCM(object):
     """ A Two rate three color marker. Uses the flow_id packet field to
@@ -302,6 +326,7 @@ class TrTCM(object):
         cir : Committed Information Rate in units of bits (time part maybe scaled)
         cbs : Committed Burst Size in bytes
     """
+
     def __init__(self, env, pir, pbs, cir, cbs):
         self.env = env
         self.out = None
@@ -317,10 +342,10 @@ class TrTCM(object):
         time_inc = self.env.now - self.last_time
         self.last_time = self.env.now
         # Add bytes to the buckets
-        self.pbucket += self.pir*time_inc/8.0  # rate in bits, bucket in bytes
+        self.pbucket += self.pir * time_inc / 8.0  # rate in bits, bucket in bytes
         if self.pbucket > self.pbs:
             self.pbucket = self.pbs
-        self.cbucket += self.cir*time_inc/8.0  # rate in bits, bucket in bytes
+        self.cbucket += self.cir * time_inc / 8.0  # rate in bits, bucket in bytes
         if self.cbucket > self.cbs:
             self.cbucket = self.cbs
         # Check marking criteria and mark
@@ -336,12 +361,14 @@ class TrTCM(object):
         # Send marked packet on its way
         self.out.put(pkt)
 
+
 class SnoopSplitter(object):
     """ A snoop port like splitter. Sends the original packet out port 1
         and sends a copy of the packet out port 2.
 
         You need to set the values of out1 and out2.
     """
+
     def __init__(self):
         self.out1 = None
         self.out2 = None
@@ -352,6 +379,7 @@ class SnoopSplitter(object):
             self.out1.put(pkt)
         if self.out2:
             self.out2.put(pkt2)
+
 
 """
     Trying to implement a stamped/ordered version of the Simpy Store class.
@@ -369,6 +397,7 @@ class StampedStorePut(base.Put):
         The item must be a tuple (stamp, contents) where the stamp is used to sort
         the content in the StampedStore.
     """
+
     def __init__(self, resource, item):
         self.item = item
         """The item to put into the store."""
@@ -394,13 +423,14 @@ class StampedStore(base.BaseResource):
     raised if the value is negative.
 
     """
+
     def __init__(self, env, capacity=float('inf')):
         super(StampedStore, self).__init__(env, capacity=float('inf'))
         if capacity <= 0:
             raise ValueError('"capacity" must be > 0.')
         self._capacity = capacity
         self.items = []  # we are keeping items sorted by stamp
-        self.event_count = 0 # Used to break ties with python heap implementation
+        self.event_count = 0  # Used to break ties with python heap implementation
         # See: https://docs.python.org/3/library/heapq.html?highlight=heappush#priority-queue-implementation-notes
         """List of the items within the store."""
 
@@ -418,7 +448,7 @@ class StampedStore(base.BaseResource):
     # We assume the item is a tuple: (stamp, packet). The stamp is used to
     # sort the packet in the heap.
     def _do_put(self, event):
-        self.event_count += 1 # Needed this to break heap ties
+        self.event_count += 1  # Needed this to break heap ties
         if len(self.items) < self._capacity:
             heappush(self.items, [event.item[0], self.event_count, event.item[1]])
             event.succeed()
@@ -428,6 +458,7 @@ class StampedStore(base.BaseResource):
     def _do_get(self, event):
         if self.items:
             event.succeed(heappop(self.items)[2])
+
 
 """
     A Set of components to enable simulation of various networking QoS scenarios.
@@ -455,6 +486,7 @@ class ShaperTokenBucket(object):
             the peak sending rate of the buffer (quickest time two packets could be sent)
 
     """
+
     def __init__(self, env, rate, b_size, peak=None, debug=False):
         self.store = simpy.Store(env)
         self.rate = rate
@@ -476,13 +508,13 @@ class ShaperTokenBucket(object):
             msg = (yield self.store.get())
             now = self.env.now
             #  Add tokens to bucket based on current time
-            self.current_bucket = min(self.b_size, self.current_bucket + self.rate*(now-self.update_time)/8.0)
+            self.current_bucket = min(self.b_size, self.current_bucket + self.rate * (now - self.update_time) / 8.0)
             self.update_time = now
             #  Check if there are enough tokens to allow packet to be sent
             #  If not we will wait to accumulate enough tokens to let this packet pass
             #  regardless of the bucket size.
             if msg.size > self.current_bucket:  # Need to wait for bucket to fill before sending
-                yield self.env.timeout((msg.size - self.current_bucket)*8.0/self.rate)
+                yield self.env.timeout((msg.size - self.current_bucket) * 8.0 / self.rate)
                 self.current_bucket = 0.0
                 self.update_time = self.env.now
             else:
@@ -492,7 +524,7 @@ class ShaperTokenBucket(object):
             if not self.peak:  # Infinite peak rate
                 self.out.put(msg)
             else:
-                yield self.env.timeout(msg.size*8.0/self.peak)
+                yield self.env.timeout(msg.size * 8.0 / self.peak)
                 self.out.put(msg)
             self.packets_sent += 1
             if self.debug:
@@ -520,6 +552,7 @@ class VirtualClockServer(object):
             flow id to vticks, i.e., flow_id = 0 corresponds to vticks[0], etc... We assume that the vticks are
             the inverse of the desired rates for the flows in bits per second.
     """
+
     def __init__(self, env, rate, vticks, debug=False):
         self.env = env
         self.rate = rate
@@ -536,7 +569,7 @@ class VirtualClockServer(object):
         while True:
             msg = (yield self.store.get())
             # Send message
-            yield self.env.timeout(msg.size*8.0/self.rate)
+            yield self.env.timeout(msg.size * 8.0 / self.rate)
             self.out.put(msg)
 
     def put(self, pkt):
@@ -546,7 +579,7 @@ class VirtualClockServer(object):
         # Update of auxVC for the flow. We assume that vticks is the desired bit time
         # i.e., the inverse of the desired bits per second data rate.
         # Hence we then multiply this value by the size of the packet in bits.
-        self.auxVCs[flow_id] = max(now, self.auxVCs[flow_id]) + self.vticks[flow_id]*pkt.size*8.0
+        self.auxVCs[flow_id] = max(now, self.auxVCs[flow_id]) + self.vticks[flow_id] * pkt.size * 8.0
         # Lots of work to do here to implement the queueing discipline
         return self.store.put((self.auxVCs[flow_id], pkt))
 
@@ -566,6 +599,7 @@ class WFQServer(object):
             list of the phis parameters (for each possible packet flow_id). We assume a simple assignment of
             flow id to phis, i.e., flow_id = 0 corresponds to phis[0], etc...
     """
+
     def __init__(self, env, rate, phis, debug=False):
         self.env = env
         self.rate = rate
@@ -598,7 +632,7 @@ class WFQServer(object):
                 for i in range(len(self.F_times)):
                     self.F_times[i] = 0.0
             # Send message
-            yield self.env.timeout(msg.size*8.0/self.rate)
+            yield self.env.timeout(msg.size * 8.0 / self.rate)
             self.out.put(msg)
 
     def put(self, pkt):
@@ -610,8 +644,8 @@ class WFQServer(object):
         phi_sum = 0.0
         for i in self.active_set:
             phi_sum += self.phis[i]
-        self.vtime += (now-self.last_update)/phi_sum
-        self.F_times[flow_id] = max(self.F_times[flow_id], self.vtime) + pkt.size*8.0/self.phis[flow_id]
+        self.vtime += (now - self.last_update) / phi_sum
+        self.F_times[flow_id] = max(self.F_times[flow_id], self.vtime) + pkt.size * 8.0 / self.phis[flow_id]
         # print "Flow id = {}, packet_id = {}, F_time = {}".format(flow_id, pkt.id, self.F_times[flow_id])
         self.last_update = now
         return self.store.put((self.F_times[flow_id], pkt))
