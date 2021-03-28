@@ -1,9 +1,3 @@
-"""
-    A bit more detailed set of components to use in packet switching
-    queueing experiments.
-    Copyright 2014 Greg M. Bernstein
-    Released under the MIT license
-"""
 import enum
 from typing import Optional
 
@@ -187,13 +181,14 @@ class SwitchPort(object):
 
     """
 
-    def __init__(self, env, rate, qlimit=None, limit_bytes=True, debug=False, queue_type=QueueType.FIFO):
+    def __init__(self, env, id, rate, qlimit=None, limit_bytes=True, debug=False, queue_type=QueueType.FIFO):
         if queue_type == QueueType.LIFO:
             self.store = LIFOStore(env)
         elif queue_type == QueueType.RANDO:
             self.store = RandoStore(env)
         else:
             self.store = simpy.Store(env)
+        self.id = id
         self.rate = rate
         self.env = env
         self.out = None

@@ -9,15 +9,16 @@ import simpy
 import matplotlib.pyplot as plt
 from SimComponents import PacketGenerator, PacketSink, SwitchPort, PortMonitor
 
+time = 8000
 
 if __name__ == '__main__':
     # Set up arrival and packet size distributions
     # Using Python functools to create callable functions for random variates with fixed parameters.
     # each call to these will produce a new random value.
-    adist = functools.partial(random.expovariate, 0.5)
+    adist = functools.partial(random.expovariate, 0.1)
     sdist = functools.partial(random.expovariate, 0.01)  # mean size 100 bytes
     samp_dist = functools.partial(random.expovariate, 1.0)
-    port_rate = 1000.0
+    port_rate = 56000.0
 
     env = simpy.Environment()  # Create the SimPy environment
     # Create the packet generators and sink
@@ -30,7 +31,7 @@ if __name__ == '__main__':
     pg.out = switch_port
     switch_port.out = ps
     # Run it
-    env.run(until=8000)
+    env.run(until=time)
     print("Last 10 waits: "  + ", ".join(["{:.3f}".format(x) for x in ps.waits[-10:]]))
     print("Last 10 queue sizes: {}".format(pm.sizes[-10:]))
     print("Last 10 sink arrival times: " + ", ".join(["{:.3f}".format(x) for x in ps.arrivals[-10:]]))
@@ -38,7 +39,7 @@ if __name__ == '__main__':
     print("received: {}, dropped {}, sent {}".format(switch_port.packets_rec, switch_port.packets_drop, pg.packets_sent))
     print("loss rate: {}".format(float(switch_port.packets_drop)/switch_port.packets_rec))
     print("average system occupancy: {:.3f}".format(float(sum(pm.sizes))/len(pm.sizes)))
-
+    print("bytes per second: {:.3f}".format(float(ps.bytes_rec/time)))
     # fig, axis = plt.subplots()
     # axis.hist(ps.waits, bins=100, normed=True)
     # axis.set_title("Histogram for waiting times")
