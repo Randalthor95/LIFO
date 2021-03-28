@@ -90,6 +90,73 @@ class PacketGenerator(object):
             self.out.put(p)
 
 
+class BurstyPacketGenerator(object):
+    """ Generates packets with given inter-arrival time distribution.
+        Set the "out" member variable to the entity to receive the packet.
+
+        Parameters
+        ----------
+        env : simpy.Environment
+            the simulation environment
+        adist : function
+            a no parameter function that returns the successive inter-arrival times of the packets
+        sdist : function
+            a no parameter function that returns the successive sizes of the packets
+        bursty_adist : function
+            a no parameter function that returns the successive inter-arrival times of the packets for bursty
+        bursty_sdist : function
+            a no parameter function that returns the successive sizes of the packets for bursty
+        probablity_of_burst: float
+            the probablity of a burst occuring. default 0
+        burst_length_dist: function
+            a no parameter function which will determine how long a burst will last
+        initial_delay : number
+            Starts generation after an initial delay. Default = 0
+        finish : number
+            Stops generation at the finish time. Default is infinite
+
+
+    """
+
+    def __init__(self, env, id, adist, sdist, bursty_adist=0, bursty_sdist=0, probablity_of_burst=0.0,
+                 burst_rounds_dist=0, initial_delay=0, finish=float("inf"), flow_id=0):
+        self.id = id
+        self.env = env
+        self.adist = adist
+        self.sdist = sdist
+        self.bursty_adist = bursty_adist
+        self.bursty_sdist = bursty_sdist
+        self.probability_of_burst = probablity_of_burst
+        self.burst_rounds_dist = burst_rounds_dist
+        self.initial_delay = initial_delay
+        self.finish = finish
+        self.out = None
+        self.packets_sent = 0
+        self.action = env.process(self.run())  # starts the run() method as a SimPy process
+        self.flow_id = flow_id
+        self.burst_rounds = 0
+
+    def run(self):
+        """The generator function used in simulations.
+        """
+        yield self.env.timeout(self.initial_delay)
+        while self.env.now < self.finish:
+            if self.burst_rounds <= 0 and random.uniform(0, 1) < self.probability_of_burst:
+                self.burst_rounds = self.burst_rounds_dist()
+
+            if self.burst_rounds > 0:
+                # wait for next transmission
+                yield self.env.timeout(self.bursty_adist())
+                self.packets_sent += 1
+                p = Packet(self.env.now, self.bursty_sdist(), self.packets_sent, src=self.id, flow_id=self.flow_id)
+                self.burst_rounds -= self.burst_rounds
+            else:
+                yield self.env.timeout(self.adist())
+                self.packets_sent += 1
+                p = Packet(self.env.now, self.sdist(), self.packets_sent, src=self.id, flow_id=self.flow_id)
+            self.out.put(p)
+
+
 class PacketSink(object):
     """ Receives packets and collects delay information into the
         waits list. You can then use this list to look at delay statistics.
