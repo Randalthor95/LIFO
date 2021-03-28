@@ -10,7 +10,7 @@ Released under the MIT license
 from random import expovariate
 
 import simpy
-from SimComponents import PacketGenerator, PacketSink, SwitchPort
+from SimComponents import PacketGenerator, PacketSink, SwitchPort, QueueType
 
 
 def constArrival():  # Constant arrival distribution for generator 1
@@ -25,7 +25,7 @@ def distSize():
 if __name__ == '__main__':
     env = simpy.Environment()  # Create the SimPy environment
     pg = PacketGenerator(env, "SJSU", constArrival, distSize, finish=5.0)
-    switch_port = SwitchPort(env, rate=2.0, qlimit=300, fifo=False, debug=True)
+    switch_port = SwitchPort(env, rate=2.0, qlimit=300, queue_type=QueueType.RANDO, debug=True)
     ps = PacketSink(env, debug=True)  # debug: every packet arrival is printed
     # Wire packet generators and sinks together
     pg.out = switch_port

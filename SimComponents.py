@@ -4,6 +4,7 @@
     Copyright 2014 Greg M. Bernstein
     Released under the MIT license
 """
+import enum
 from typing import Optional
 
 import simpy
@@ -148,10 +149,23 @@ class PacketSink(object):
                 print(pkt)
 
 
+class QueueType(enum.Enum):
+    FIFO = 1
+    LIFO = 2
+    RANDO = 3
+
+
 class LIFOStore(Store):
     def _do_get(self, event: StoreGet) -> Optional[bool]:
         if self.items:
             event.succeed(self.items.pop())
+        return None
+
+
+class RandoStore(Store):
+    def _do_get(self, event: StoreGet) -> Optional[bool]:
+        if self.items:
+            event.succeed(self.items.pop(random.randrange(len(self.items))))
         return None
 
 
@@ -173,11 +187,13 @@ class SwitchPort(object):
 
     """
 
-    def __init__(self, env, rate, qlimit=None, limit_bytes=True, debug=False, fifo=False):
-        if fifo:
-            self.store = simpy.Store(env)
-        else:
+    def __init__(self, env, rate, qlimit=None, limit_bytes=True, debug=False, queue_type=QueueType.FIFO):
+        if queue_type == QueueType.LIFO:
             self.store = LIFOStore(env)
+        elif queue_type == QueueType.RANDO:
+            self.store = RandoStore(env)
+        else:
+            self.store = simpy.Store(env)
         self.rate = rate
         self.env = env
         self.out = None
