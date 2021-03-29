@@ -1,8 +1,4 @@
-import random
-import functools
-import simpy
 import matplotlib.pyplot as plt
-from SimComponents import PacketGenerator, PacketSink, SwitchPort, PortMonitor
 
 
 def get_metrics(packet_generator, packet_sink, switch_port, port_monitor, time):
@@ -14,6 +10,7 @@ def get_metrics(packet_generator, packet_sink, switch_port, port_monitor, time):
     print("average switch occupancy for", port_monitor.port.id,
           ": {:.3f}".format(float(sum(port_monitor.sizes)) / len(port_monitor.sizes)))
     print("bytes per second: {:.3f}".format(float(packet_sink.bytes_rec / time)))
+    print("average packet size: {:.3f} bytes".format(float(packet_sink.bytes_rec / packet_sink.packets_rec)))
     # fig, axis = plt.subplots()
     # axis.hist(packet_sink.waits, bins=100, normed=True)
     # axis.set_title("Histogram for waiting times")

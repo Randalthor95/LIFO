@@ -1,8 +1,13 @@
 from random import expovariate
 import simpy
 import random
-from SimComponents import PacketGenerator, PacketSink, SwitchPort, QueueType
 
+from scipy.stats import halfnorm
+
+from SimComponents import PacketGenerator, PacketSink, SwitchPort, QueueType
+import matplotlib.pyplot
+import numpy as np
+import matplotlib.pyplot as plt
 
 def const_arrival():  # Constant arrival distribution for generator 1
     return 1.0
@@ -17,13 +22,18 @@ def dist_size():
 
 
 if __name__ == '__main__':
-    print("Here is a single sample from a uniform random variable")
-    print(random.random())
-    print("Here is a list of three samples:")
-    uniSamples = [random.random(), random.random(), random.random()]
-    print(uniSamples)
-    print("Here is a list of 10 exponential samples:")
-    expSamples = []
-    for x in range(10):
-        expSamples.append(random.uniform(0.01, 1))
-    print(expSamples)
+    numargs = halfnorm.numargs
+    [] = [0.7, ] * numargs
+    rv = halfnorm()
+
+    print("RV : \n", rv)
+    quantile = np.arange(0.01, 1, 0.1)
+
+    # Random Variates
+    R = halfnorm.rvs(scale=2, size=10)
+    print("Random Variates : \n", R)
+    distribution = np.linspace(0, np.minimum(rv.dist.b, 3))
+    print("Distribution : \n", distribution)
+
+    plot = plt.plot(distribution, rv.pdf(distribution))
+    plt.show()
