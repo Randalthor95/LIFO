@@ -7,7 +7,7 @@ from DataGeneration import get_metrics
 from SimComponents import PacketGenerator, PacketSink, SwitchPort, QueueType, PortMonitor, BurstyPacketGenerator
 
 switch_port_bit_rate = 200000 * 8
-switch_port_qlimit = 2500
+switch_port_qlimit = 2000000
 time = 200
 port_monitor_sampling_distribution = functools.partial(random.expovariate, 1.0)
 
