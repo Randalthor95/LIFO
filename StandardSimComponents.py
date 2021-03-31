@@ -23,11 +23,11 @@ def test_one_generator_one_switch(packet_generator_type, queue_type):
     env = simpy.Environment()  # Create the SimPy environment
     packet_generator = \
         (packet_generator_type == PacketGeneratorType.Constant and standard_constant_packet_generator(env, 'gA')) \
-        or (packet_generator_type == PacketGeneratorType.Bursty and standard_burst_packet_generator(env, 'gA')) \
+        or (packet_generator_type == PacketGeneratorType.Bursty and standard_bursty_packet_generator(env, 'gA')) \
         or (packet_generator_type == PacketGeneratorType.Normal and standard_normal_packet_generator(env, 'gA')) \
-        or standard_exponential_packet_generator(env, 'gA')
+        or standard_exponential_packet_generator(env, 'g')
 
-    switch_port = SwitchPort(env, id='sA',
+    switch_port = SwitchPort(env, id='s',
                              rate=switch_port_bit_rate, qlimit=switch_port_qlimit, queue_type=queue_type)
     packet_sink = PacketSink(env, rec_arrivals=True)  # debug: every packet arrival is printed
     # Wire packet generators and sinks together
@@ -35,8 +35,32 @@ def test_one_generator_one_switch(packet_generator_type, queue_type):
     switch_port.out = packet_sink
     port_monitor = PortMonitor(env, switch_port, port_monitor_sampling_distribution)
     env.run(until=time)
-    get_metrics(packet_generator_type, queue_type, packet_generator, packet_sink, switch_port, port_monitor, time)
+    get_metrics(packet_generator_type, queue_type, [packet_generator], packet_sink, switch_port, port_monitor, time)
 
+def test_one_of_each_generator_one_switch(queue_type):
+    env = simpy.Environment()  # Create the SimPy environment
+    constant_packet_generator = standard_constant_packet_generator(env, 'g_constant')
+    bursty_packet_generator = standard_bursty_packet_generator(env, 'g_burst')
+    normal_packet_generator = standard_normal_packet_generator(env, 'g_normal')
+    exponential_packet_generator = standard_exponential_packet_generator(env, 'g_exponential')
+    packet_generators = []
+    packet_generators.append(constant_packet_generator)
+    packet_generators.append(bursty_packet_generator)
+    packet_generators.append(normal_packet_generator)
+    packet_generators.append(exponential_packet_generator)
+
+    switch_port = SwitchPort(env, id='sA',
+                             rate=switch_port_bit_rate, qlimit=switch_port_qlimit, queue_type=queue_type)
+    packet_sink = PacketSink(env, rec_arrivals=True)  # debug: every packet arrival is printed
+    # Wire packet generators and sinks together
+    constant_packet_generator.out = switch_port
+    bursty_packet_generator.out = switch_port
+    normal_packet_generator.out = switch_port
+    exponential_packet_generator.out = switch_port
+    switch_port.out = packet_sink
+    port_monitor = PortMonitor(env, switch_port, port_monitor_sampling_distribution)
+    env.run(until=time)
+    get_metrics('One of Each Generator One Switch', queue_type, packet_generators, packet_sink, switch_port, port_monitor, time)
 
 # Constant  ####################################################################################################
 
@@ -56,29 +80,29 @@ def standard_constant_packet_generator(env, id):
 # Bursty  ####################################################################################################
 
 def norm_packet_generator_inter_arrival_rate():  # Normal arrival distribution for generator 1
-    return abs(random.normalvariate(1 / 10, 1 / 200))
+    return abs(random.normalvariate(1 / 100, 1 / 200))
 
 
 def norm_packet_size_in_bytes_distribution():
-    return abs(random.normalvariate(10.0, 10.0))
+    return abs(random.normalvariate(100.0, 50.0))
 
 
 def bursty_packet_generator_inter_arrival_rate():  # Constant arrival distribution for generator 1
-    return abs(random.normalvariate(1 / 1000, 1 / 200))
+    return abs(random.normalvariate(1 / 2000, 1 / 200))
 
 
 def bursty_packet_size_in_bytes_distribution():
-    return abs(random.normalvariate(1000.0, 500))
+    return abs(random.normalvariate(2000.0, 500))
 
 
 def burst_rounds_distribution():
-    return abs(random.normalvariate(5, 10))
+    return abs(random.normalvariate(10, 10))
 
 
 probability_of_burst = .3
 
 
-def standard_burst_packet_generator(env, id):
+def standard_bursty_packet_generator(env, id):
     return BurstyPacketGenerator(env, id, norm_packet_generator_inter_arrival_rate,
                                  norm_packet_size_in_bytes_distribution,
                                  bursty_packet_generator_inter_arrival_rate,
@@ -93,7 +117,7 @@ def normal_packet_generator_inter_arrival_rate():  # Constant arrival distributi
 
 
 def normal_packet_size_in_bytes_distribution():
-    return abs(random.normalvariate(600, 300))
+    return abs(random.normalvariate(800, 300))
 
 
 def standard_normal_packet_generator(env, id):
@@ -104,7 +128,7 @@ def standard_normal_packet_generator(env, id):
 # Exponential  ####################################################################################################
 
 def exponential_packet_generator_inter_arrival_rate():  # Constant arrival distribution for generator 1
-    return abs(random.expovariate(1000))
+    return abs(random.expovariate(500))
 
 
 def exponential_packet_size_in_bytes_distribution():
