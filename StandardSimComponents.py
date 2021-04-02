@@ -19,13 +19,44 @@ class PacketGeneratorType(enum.Enum):
     Exponential = 4
 
 
+def test_multihop_path(packet_generator_type, queue_type, num_switches):
+    env = simpy.Environment()  # Create the SimPy environment
+
+    packet_generator = \
+        (packet_generator_type == PacketGeneratorType.Constant
+         and standard_constant_packet_generator(env, 'g')) \
+        or (packet_generator_type == PacketGeneratorType.Bursty
+            and standard_bursty_packet_generator(env, 'g')) \
+        or (packet_generator_type == PacketGeneratorType.Normal
+            and standard_normal_packet_generator(env, 'g')) \
+        or standard_exponential_packet_generator(env, 'g')
+
+    switch_ports = []
+    port_monitors = []
+    for i in range(num_switches):
+        switch_ports.append(SwitchPort(env, id='s' + str(i),
+                                   rate=switch_port_bit_rate, qlimit=switch_port_qlimit, queue_type=queue_type))
+        port_monitors.append(PortMonitor(env, switch_ports[i], port_monitor_sampling_distribution))
+
+    for i in range(num_switches):
+        if i < num_switches - 1:
+            switch_ports[i].out = switch_ports[i + 1]
+
+    packet_generator.out = switch_ports[0]
+    packet_sink = PacketSink(env, rec_arrivals=True)  # debug: every packet arrival is printed
+    switch_ports[num_switches - 1].out = packet_sink
+    # Wire packet generators and sinks together
+    env.run(until=time)
+    get_metrics(packet_generator_type, queue_type, [packet_generator], packet_sink, switch_ports, port_monitors, time)
+
+
 def test_one_generator_one_switch(packet_generator_type, queue_type):
     env = simpy.Environment()  # Create the SimPy environment
     packet_generator = \
         (packet_generator_type == PacketGeneratorType.Constant and standard_constant_packet_generator(env, 'gA')) \
         or (packet_generator_type == PacketGeneratorType.Bursty and standard_bursty_packet_generator(env, 'gA')) \
         or (packet_generator_type == PacketGeneratorType.Normal and standard_normal_packet_generator(env, 'gA')) \
-        or standard_exponential_packet_generator(env, 'g')
+        or standard_exponential_packet_generator(env, 'gA')
 
     switch_port = SwitchPort(env, id='s',
                              rate=switch_port_bit_rate, qlimit=switch_port_qlimit, queue_type=queue_type)
@@ -35,7 +66,7 @@ def test_one_generator_one_switch(packet_generator_type, queue_type):
     switch_port.out = packet_sink
     port_monitor = PortMonitor(env, switch_port, port_monitor_sampling_distribution)
     env.run(until=time)
-    get_metrics(packet_generator_type, queue_type, [packet_generator], packet_sink, switch_port, port_monitor, time)
+    get_metrics(packet_generator_type, queue_type, [packet_generator], packet_sink, [switch_port], [port_monitor], time)
 
 
 def test_one_of_each_generator_one_switch(queue_type):
@@ -61,8 +92,33 @@ def test_one_of_each_generator_one_switch(queue_type):
     switch_port.out = packet_sink
     port_monitor = PortMonitor(env, switch_port, port_monitor_sampling_distribution)
     env.run(until=time)
-    get_metrics('One of Each Generator One Switch', queue_type, packet_generators, packet_sink, switch_port,
-                port_monitor, time)
+    get_metrics('One of Each Generator One Switch', queue_type, packet_generators, packet_sink, [switch_port],
+                [port_monitor], time)
+
+
+def test_overloaded_switch(packet_generator_type, queue_type, num_nodes):
+    env = simpy.Environment()  # Create the SimPy environment
+    switch_port = SwitchPort(env, id='s',
+                             rate=switch_port_bit_rate, qlimit=switch_port_qlimit, queue_type=queue_type)
+    packet_generators = []
+    for i in range(num_nodes):
+        packet_generator = \
+            (packet_generator_type == PacketGeneratorType.Constant
+             and standard_constant_packet_generator(env, 'g' + str(i))) \
+            or (packet_generator_type == PacketGeneratorType.Bursty
+                and standard_bursty_packet_generator(env, 'g' + str(i))) \
+            or (packet_generator_type == PacketGeneratorType.Normal
+                and standard_normal_packet_generator(env, 'g' + str(i))) \
+            or standard_exponential_packet_generator(env, 'g' + str(i))
+        packet_generator.out = switch_port
+        packet_generators.append(packet_generator)
+
+    packet_sink = PacketSink(env, rec_arrivals=True)  # debug: every packet arrival is printed
+    # Wire packet generators and sinks together
+    switch_port.out = packet_sink
+    port_monitor = PortMonitor(env, switch_port, port_monitor_sampling_distribution)
+    env.run(until=time)
+    get_metrics(packet_generator_type, queue_type, packet_generators, packet_sink, [switch_port], [port_monitor], time)
 
 
 def test_two_good_one_bad(packet_generator_type, queue_type):
@@ -97,8 +153,8 @@ def test_two_good_one_bad(packet_generator_type, queue_type):
     switch_port.out = packet_sink
     port_monitor = PortMonitor(env, switch_port, port_monitor_sampling_distribution)
     env.run(until=time)
-    get_metrics('One of Each Generator One Switch', queue_type, packet_generators, packet_sink, switch_port,
-                port_monitor, time)
+    get_metrics('One of Each Generator One Switch', queue_type, packet_generators, packet_sink, [switch_port],
+                [port_monitor], time)
 
 
 # Constant  ####################################################################################################
@@ -115,6 +171,7 @@ def standard_constant_packet_generator(env, id):
     return PacketGenerator(env, id, constant_packet_generator_inter_arrival_rate,
                            constant_packet_size_in_bytes_distribution)
 
+
 def bad_constant_packet_generator_inter_arrival_rate():  # Constant arrival distribution for generator 1
     return 1 / 600
 
@@ -122,9 +179,12 @@ def bad_constant_packet_generator_inter_arrival_rate():  # Constant arrival dist
 def bad_constant_packet_size_in_bytes_distribution():
     return 600.0
 
+
 def bad_standard_constant_packet_generator(env, id):
     return PacketGenerator(env, id, bad_constant_packet_generator_inter_arrival_rate,
                            bad_constant_packet_size_in_bytes_distribution)
+
+
 # Bursty  ####################################################################################################
 
 def norm_packet_generator_inter_arrival_rate():  # Normal arrival distribution for generator 1
@@ -157,6 +217,7 @@ def standard_bursty_packet_generator(env, id):
                                  bursty_packet_size_in_bytes_distribution, probability_of_burst,
                                  burst_rounds_distribution)
 
+
 def bad_norm_packet_generator_inter_arrival_rate():  # Normal arrival distribution for generator 1
     return abs(random.normalvariate(1 / 600, 1 / 100))
 
@@ -186,6 +247,8 @@ def bad_standard_bursty_packet_generator(env, id):
                                  bad_bursty_packet_generator_inter_arrival_rate,
                                  bad_bursty_packet_size_in_bytes_distribution, bad_probability_of_burst,
                                  bad_burst_rounds_distribution)
+
+
 # Normal  ####################################################################################################
 
 def normal_packet_generator_inter_arrival_rate():  # Constant arrival distribution for generator 1
@@ -212,6 +275,7 @@ def bad_normal_packet_size_in_bytes_distribution():
 def bad_standard_normal_packet_generator(env, id):
     return PacketGenerator(env, id, bad_normal_packet_generator_inter_arrival_rate,
                            bad_normal_packet_size_in_bytes_distribution)
+
 
 # Exponential  ####################################################################################################
 

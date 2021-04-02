@@ -41,10 +41,10 @@ if __name__ == '__main__':
     pg3 = PacketGenerator(env, "SJSU3", adist3, sdist)
     branch1 = RandomBrancher(env, [0.75, 0.25])
     branch2 = RandomBrancher(env, [0.65, 0.35])
-    switch_port1 = SwitchPort(env, port_rate)
-    switch_port2 = SwitchPort(env, port_rate)
-    switch_port3 = SwitchPort(env, port_rate)
-    switch_port4 = SwitchPort(env, port_rate)
+    switch_port1 = SwitchPort(env, 's1', port_rate)
+    switch_port2 = SwitchPort(env, 's2', port_rate)
+    switch_port3 = SwitchPort(env, 's3', port_rate)
+    switch_port4 = SwitchPort(env, 's4', port_rate)
 
     # Wire packet generators, switch ports, and sinks together
     pg1.out = switch_port1
