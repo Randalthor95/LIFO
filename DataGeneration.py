@@ -6,7 +6,7 @@ def get_metrics(network_name, queue_type, packet_generators, packet_sink, switch
     print("average wait = {:.3f}".format(sum(packet_sink.waits) / len(packet_sink.waits)))
     print("received: {}, dropped {}".format(switch_port.packets_rec, switch_port.packets_drop,))
     for packet_generator in packet_generators:
-        print("id: {}, sent: {}".format(packet_generator.id ,packet_generator.packets_sent))
+        print("id: {}, sent: {}".format(packet_generator.id, packet_generator.packets_sent))
     print("loss rate: {}".format(float(switch_port.packets_drop) / switch_port.packets_rec))
     print("average switch occupancy for", port_monitor.port.id,
           ": {:.3f}".format(float(sum(port_monitor.sizes)) / len(port_monitor.sizes)))

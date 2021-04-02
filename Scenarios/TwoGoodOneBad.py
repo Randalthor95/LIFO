@@ -1,0 +1,4 @@
+from SimComponents import QueueType, PacketGenerator
+from StandardSimComponents import test_two_good_one_bad, PacketGeneratorType
+
+test_two_good_one_bad(PacketGeneratorType.Exponential, QueueType.FIFO)

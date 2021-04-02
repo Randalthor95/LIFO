@@ -118,8 +118,8 @@ class BurstyPacketGenerator(object):
 
     """
 
-    def __init__(self, env, id, adist, sdist, bursty_adist=0, bursty_sdist=0, probablity_of_burst=0.0,
-                 burst_rounds_dist=0, initial_delay=0, finish=float("inf"), flow_id=0):
+    def __init__(self, env, id, adist, sdist, bursty_adist, bursty_sdist, probablity_of_burst,
+                 burst_rounds_dist, initial_delay=0, finish=float("inf"), flow_id=0):
         self.id = id
         self.env = env
         self.adist = adist
@@ -149,7 +149,7 @@ class BurstyPacketGenerator(object):
                 yield self.env.timeout(self.bursty_adist())
                 self.packets_sent += 1
                 p = Packet(self.env.now, self.bursty_sdist(), self.packets_sent, src=self.id, flow_id=self.flow_id)
-                self.burst_rounds -= self.burst_rounds
+                self.burst_rounds -= 1
             else:
                 yield self.env.timeout(self.adist())
                 self.packets_sent += 1
