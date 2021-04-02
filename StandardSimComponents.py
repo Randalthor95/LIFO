@@ -18,6 +18,50 @@ class PacketGeneratorType(enum.Enum):
     Normal = 3
     Exponential = 4
 
+def test_complex_network(packet_generator_type, queue_type):
+    env = simpy.Environment()  # Create the SimPy environment
+    num_generators = 9
+    num_switches = 5
+    packet_generators = []
+    for i in range(num_generators):
+        packet_generator = \
+            (packet_generator_type == PacketGeneratorType.Constant
+             and standard_constant_packet_generator(env, 'g' + str(i))) \
+            or (packet_generator_type == PacketGeneratorType.Bursty
+                and standard_bursty_packet_generator(env, 'g' + str(i))) \
+            or (packet_generator_type == PacketGeneratorType.Normal
+                and standard_normal_packet_generator(env, 'g' + str(i))) \
+            or standard_exponential_packet_generator(env, 'g' + str(i))
+        packet_generators.append(packet_generator)
+
+    switch_ports = []
+    port_monitors = []
+    for i in range(num_switches):
+        switch_ports.append(SwitchPort(env, id='s' + str(i),
+                                   rate=switch_port_bit_rate, qlimit=switch_port_qlimit, queue_type=queue_type))
+        port_monitors.append(PortMonitor(env, switch_ports[i], port_monitor_sampling_distribution))
+
+    for i in range(num_switches):
+        if i < num_switches - 1:
+            switch_ports[i].out = switch_ports[i + 1]
+
+    packet_sink = PacketSink(env, rec_arrivals=True)  # debug: every packet arrival is printed
+    switch_ports[num_switches - 1].out = packet_sink
+
+    # Wire packet generators and sinks together
+    packet_generators[0].out = switch_ports[0]
+    packet_generators[1].out = switch_ports[0]
+    packet_generators[2].out = switch_ports[0]
+    packet_generators[3].out = switch_ports[1]
+    packet_generators[4].out = switch_ports[2]
+    packet_generators[5].out = switch_ports[2]
+    packet_generators[6].out = switch_ports[4]
+    packet_generators[7].out = switch_ports[4]
+    packet_generators[8].out = switch_ports[4]
+
+    env.run(until=time)
+    get_metrics(packet_generator_type, queue_type, packet_generators, packet_sink, switch_ports, port_monitors, time)
+
 
 def test_multihop_path(packet_generator_type, queue_type, num_switches):
     env = simpy.Environment()  # Create the SimPy environment
