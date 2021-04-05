@@ -3,7 +3,7 @@ import functools
 import random
 import simpy
 
-from DataGeneration import get_metrics
+from DataGeneration import get_metrics, save_metrics
 from SimComponents import PacketGenerator, PacketSink, SwitchPort, QueueType, PortMonitor, BurstyPacketGenerator
 
 switch_port_bit_rate = 200000 * 8
@@ -17,6 +17,7 @@ class PacketGeneratorType(enum.Enum):
     Bursty = 2
     Normal = 3
     Exponential = 4
+
 
 def test_complex_network(packet_generator_type, queue_type):
     env = simpy.Environment()  # Create the SimPy environment
@@ -38,7 +39,7 @@ def test_complex_network(packet_generator_type, queue_type):
     port_monitors = []
     for i in range(num_switches):
         switch_ports.append(SwitchPort(env, id='s' + str(i),
-                                   rate=switch_port_bit_rate, qlimit=switch_port_qlimit, queue_type=queue_type))
+                                       rate=switch_port_bit_rate, qlimit=switch_port_qlimit, queue_type=queue_type))
         port_monitors.append(PortMonitor(env, switch_ports[i], port_monitor_sampling_distribution))
 
     for i in range(num_switches):
@@ -79,7 +80,7 @@ def test_multihop_path(packet_generator_type, queue_type, num_switches):
     port_monitors = []
     for i in range(num_switches):
         switch_ports.append(SwitchPort(env, id='s' + str(i),
-                                   rate=switch_port_bit_rate, qlimit=switch_port_qlimit, queue_type=queue_type))
+                                       rate=switch_port_bit_rate, qlimit=switch_port_qlimit, queue_type=queue_type))
         port_monitors.append(PortMonitor(env, switch_ports[i], port_monitor_sampling_distribution))
 
     for i in range(num_switches):
@@ -111,6 +112,8 @@ def test_one_generator_one_switch(packet_generator_type, queue_type):
     port_monitor = PortMonitor(env, switch_port, port_monitor_sampling_distribution)
     env.run(until=time)
     get_metrics(packet_generator_type, queue_type, [packet_generator], packet_sink, [switch_port], [port_monitor], time)
+    save_metrics('a ', packet_generator_type, queue_type, [packet_generator], packet_sink, [switch_port],
+                 [port_monitor], time)
 
 
 def test_one_of_each_generator_one_switch(queue_type):
