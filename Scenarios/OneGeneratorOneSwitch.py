@@ -2,3 +2,6 @@ from SimComponents import QueueType
 from StandardSimComponents import test_one_generator_one_switch, PacketGeneratorType, test_one_generator_one_switch_all
 
 test_one_generator_one_switch_all(PacketGeneratorType.Constant)
+test_one_generator_one_switch_all(PacketGeneratorType.Bursty)
+test_one_generator_one_switch_all(PacketGeneratorType.Exponential)
+test_one_generator_one_switch_all(PacketGeneratorType.Normal)

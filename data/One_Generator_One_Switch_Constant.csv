@@ -1,0 +1,30 @@
+id,0
+Packets Sent,60000
+id,sw0
+Packets Received,60000
+Packets Dropped,0
+Loss Rate,0.0
+Average Buffer Occupancy,0.467005
+id,s0
+Average Wait Time,0.0015
+Bytes per Second,89998.5
+id,0
+Packets Sent,60000
+id,sw0
+Packets Received,60000
+Packets Dropped,0
+Loss Rate,0.0
+Average Buffer Occupancy,0.467005
+id,s0
+Average Wait Time,0.0015
+Bytes per Second,89998.5
+id,0
+Packets Sent,60000
+id,sw0
+Packets Received,60000
+Packets Dropped,0
+Loss Rate,0.0
+Average Buffer Occupancy,0.448276
+id,s0
+Average Wait Time,0.0015
+Bytes per Second,89998.5

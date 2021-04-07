@@ -6,6 +6,7 @@ import plotly.graph_objects as go
 
 decimal_places = 6
 
+
 def print_metrics(network_name, queue_type, packet_generators, packet_sink, switch_ports, port_monitors, time):
     print(network_name.name, queue_type.name)
     for packet_generator in packet_generators:
@@ -83,7 +84,8 @@ def format_metrics(network_name, packet_generator_type, components):
     sink_ids = ['id', components.packet_sink.id]
     average_wait_time = ['Average Wait Time',
                          round((sum(components.packet_sink.waits) / len(components.packet_sink.waits)), decimal_places)]
-    bytes_per_second = ['Bytes per Second', round(float(components.packet_sink.bytes_rec / components.time), decimal_places)]
+    bytes_per_second = ['Bytes per Second',
+                        round(float(components.packet_sink.bytes_rec / components.time), decimal_places)]
 
     data.append(sink_ids)
     data.append(average_wait_time)
@@ -106,7 +108,8 @@ def save_metrics(network_name, packet_generator_type, fifo_components, lifo_comp
     for entry in rando_data:
         data.append(entry)
 
-    with open(network_name + '_' + packet_generator_type.name + '.csv', 'w', newline='', encoding='utf-8') as f:
+    with open('../data/' + network_name + '_' + packet_generator_type.name + '.csv', 'w', newline='',
+              encoding='utf-8') as f:
         # using csv.writer method from CSV package
         write = csv.writer(f)
         write.writerows(data)
