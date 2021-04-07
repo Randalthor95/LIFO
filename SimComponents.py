@@ -179,7 +179,7 @@ class PacketSink(object):
 
     """
 
-    def __init__(self, env, id='0', rec_arrivals=False, absolute_arrivals=False, rec_waits=True, debug=False, selector=None):
+    def __init__(self, env, id='s0', rec_arrivals=False, absolute_arrivals=False, rec_waits=True, debug=False, selector=None):
         self.store = simpy.Store(env)
         self.env = env
         self.id = id

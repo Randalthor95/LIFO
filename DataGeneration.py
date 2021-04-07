@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import plotly.graph_objects as go
 
+decimal_places = 6
 
 def print_metrics(network_name, queue_type, packet_generators, packet_sink, switch_ports, port_monitors, time):
     print(network_name.name, queue_type.name)
@@ -45,16 +46,15 @@ def print_metrics(network_name, queue_type, packet_generators, packet_sink, swit
     # plt.show()
 
 
-def save_metrics(path, network_name, packet_generator_type, queue_type, packet_generators, packet_sink, switch_ports,
-                 port_monitors, time):
+def format_metrics(network_name, packet_generator_type, components):
     data = []
 
     # Packet Generators
     pg_ids = ['id']
     packets_sent_data = ['Packets Sent']
-    for i in range(len(packet_generators)):
+    for i in range(len(components.packet_generators)):
         pg_ids.append(i)
-        packets_sent_data.append(packet_generators[i].packets_sent)
+        packets_sent_data.append(components.packet_generators[i].packets_sent)
     data.append(pg_ids)
     data.append(packets_sent_data)
 
@@ -64,14 +64,14 @@ def save_metrics(path, network_name, packet_generator_type, queue_type, packet_g
     packets_dropped = ['Packets Dropped']
     loss_rate = ['Loss Rate']
     buffer_occupancy = ['Average Buffer Occupancy']
-    for switch_port in switch_ports:
+    for switch_port in components.switch_ports:
         switch_ids.append(switch_port.id)
         packets_received.append(switch_port.packets_rec)
         packets_dropped.append(switch_port.packets_drop)
-        loss_rate.append(float(switch_port.packets_drop) / switch_port.packets_rec)
+        loss_rate.append(round(float(switch_port.packets_drop) / switch_port.packets_rec, decimal_places))
 
-    for port_monitor in port_monitors:
-        buffer_occupancy.append(float(sum(port_monitor.sizes)) / len(port_monitor.sizes))
+    for port_monitor in components.port_monitors:
+        buffer_occupancy.append(round(float(sum(port_monitor.sizes)) / len(port_monitor.sizes), decimal_places))
 
     data.append(switch_ids)
     data.append(packets_received)
@@ -80,18 +80,33 @@ def save_metrics(path, network_name, packet_generator_type, queue_type, packet_g
     data.append(buffer_occupancy)
 
     # Sinks
-    sink_ids = ['id', packet_sink.id]
-    average_wait_time = ['Average Wait Time', (sum(packet_sink.waits) / len(packet_sink.waits))]
-    bytes_per_second = ['Bytes per Second', float(packet_sink.bytes_rec / time)]
+    sink_ids = ['id', components.packet_sink.id]
+    average_wait_time = ['Average Wait Time',
+                         round((sum(components.packet_sink.waits) / len(components.packet_sink.waits)), decimal_places)]
+    bytes_per_second = ['Bytes per Second', round(float(components.packet_sink.bytes_rec / components.time), decimal_places)]
 
     data.append(sink_ids)
     data.append(average_wait_time)
     data.append(bytes_per_second)
+    return data
+    # print_metrics(network_name, queue_type, packet_generators, packet_sink, switch_ports, port_monitors, time)
 
-    print(data)
+
+def save_metrics(network_name, packet_generator_type, fifo_components, lifo_components, rando_components):
+    data = []
+    fifo_data = format_metrics(network_name, packet_generator_type, fifo_components)
+    for entry in fifo_data:
+        data.append(entry)
+
+    lifo_data = format_metrics(network_name, packet_generator_type, fifo_components)
+    for entry in lifo_data:
+        data.append(entry)
+
+    rando_data = format_metrics(network_name, packet_generator_type, rando_components)
+    for entry in rando_data:
+        data.append(entry)
+
     with open(network_name + '_' + packet_generator_type.name + '.csv', 'w', newline='', encoding='utf-8') as f:
         # using csv.writer method from CSV package
         write = csv.writer(f)
         write.writerows(data)
-
-    # print_metrics(network_name, queue_type, packet_generators, packet_sink, switch_ports, port_monitors, time)
