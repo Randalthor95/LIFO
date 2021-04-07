@@ -51,7 +51,7 @@ def format_metrics(network_name, packet_generator_type, components):
     data = []
 
     # Packet Generators
-    pg_ids = ['id']
+    pg_ids = ['Id']
     packets_sent_data = ['Packets Sent']
     for i in range(len(components.packet_generators)):
         pg_ids.append(i)
@@ -60,7 +60,7 @@ def format_metrics(network_name, packet_generator_type, components):
     data.append(packets_sent_data)
 
     # Switches
-    switch_ids = ['id']
+    switch_ids = ['Id']
     packets_received = ['Packets Received']
     packets_dropped = ['Packets Dropped']
     loss_rate = ['Loss Rate']
@@ -81,7 +81,7 @@ def format_metrics(network_name, packet_generator_type, components):
     data.append(buffer_occupancy)
 
     # Sinks
-    sink_ids = ['id', components.packet_sink.id]
+    sink_ids = ['Id', components.packet_sink.id]
     average_wait_time = ['Average Wait Time',
                          round((sum(components.packet_sink.waits) / len(components.packet_sink.waits)), decimal_places)]
     bytes_per_second = ['Bytes per Second',
@@ -108,7 +108,7 @@ def save_metrics(network_name, packet_generator_type, fifo_components, lifo_comp
     for entry in rando_data:
         data.append(entry)
 
-    with open('../data/' + network_name + '_' + packet_generator_type.name + '.csv', 'w', newline='',
+    with open('../Data/' + network_name + '_' + packet_generator_type.name + '.csv', 'w', newline='',
               encoding='utf-8') as f:
         # using csv.writer method from CSV package
         write = csv.writer(f)

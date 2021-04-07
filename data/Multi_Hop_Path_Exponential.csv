@@ -1,30 +1,30 @@
-id,0
-Packets Sent,59722
-id,sw0,sw1,sw2,sw3,sw4,sw5,sw6,sw7,sw8
-Packets Received,59722,59722,59720,59717,59717,59714,59713,59709,59706
+Id,0
+Packets Sent,60552
+Id,sw0,sw1,sw2,sw3,sw4,sw5,sw6,sw7,sw8
+Packets Received,60552,60551,60551,60548,60547,60544,60542,60542,60542
 Packets Dropped,0,0,0,0,0,0,0,0,0
 Loss Rate,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
-Average Buffer Occupancy,0.8125,0.886256,1.182266,1.313084,1.308824,1.555556,1.497409,1.635,1.671795
-id,s0
-Average Wait Time,0.037527
-Bytes per Second,90479.841812
-id,0
-Packets Sent,59722
-id,sw0,sw1,sw2,sw3,sw4,sw5,sw6,sw7,sw8
-Packets Received,59722,59722,59720,59717,59717,59714,59713,59709,59706
+Average Buffer Occupancy,0.786047,0.858586,1.027907,1.384956,1.34359,1.370968,1.410256,1.198068,1.469388
+Id,s0
+Average Wait Time,0.037202
+Bytes per Second,90969.386222
+Id,0
+Packets Sent,60552
+Id,sw0,sw1,sw2,sw3,sw4,sw5,sw6,sw7,sw8
+Packets Received,60552,60551,60551,60548,60547,60544,60542,60542,60542
 Packets Dropped,0,0,0,0,0,0,0,0,0
 Loss Rate,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
-Average Buffer Occupancy,0.8125,0.886256,1.182266,1.313084,1.308824,1.555556,1.497409,1.635,1.671795
-id,s0
-Average Wait Time,0.037527
-Bytes per Second,90479.841812
-id,0
-Packets Sent,60246
-id,sw0,sw1,sw2,sw3,sw4,sw5,sw6,sw7,sw8
-Packets Received,60246,60246,60246,60246,60246,60246,60244,60241,60240
+Average Buffer Occupancy,0.786047,0.858586,1.027907,1.384956,1.34359,1.370968,1.410256,1.198068,1.469388
+Id,s0
+Average Wait Time,0.037202
+Bytes per Second,90969.386222
+Id,0
+Packets Sent,59493
+Id,sw0,sw1,sw2,sw3,sw4,sw5,sw6,sw7,sw8
+Packets Received,59493,59493,59493,59493,59492,59489,59487,59486,59486
 Packets Dropped,0,0,0,0,0,0,0,0,0
 Loss Rate,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
-Average Buffer Occupancy,0.817308,0.96875,1.012048,1.335,1.201835,1.502463,1.3125,1.522124,1.552885
-id,s0
-Average Wait Time,0.037282
-Bytes per Second,90872.974622
+Average Buffer Occupancy,0.901961,0.803738,1.015,1.307317,1.35426,1.379913,1.575,1.455882,1.258065
+Id,s0
+Average Wait Time,0.036754
+Bytes per Second,89528.424047

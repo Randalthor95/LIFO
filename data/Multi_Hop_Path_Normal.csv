@@ -1,30 +1,30 @@
-id,0
-Packets Sent,61046
-id,sw0,sw1,sw2,sw3,sw4,sw5,sw6,sw7,sw8
-Packets Received,61046,49952,49950,49948,49945,49943,49941,49938,49937
+Id,0
+Packets Sent,60731
+Id,sw0,sw1,sw2,sw3,sw4,sw5,sw6,sw7,sw8
+Packets Received,60731,49886,49883,49880,49877,49874,49872,49869,49866
 Packets Dropped,0,0,0,0,0,0,0,0,0
 Loss Rate,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
-Average Buffer Occupancy,5607.846939,2.406417,2.452632,2.37931,2.41,2.369863,2.447917,2.363229,2.4375
-id,s0
-Average Wait Time,18.220994
-Bytes per Second,199913.605755
-id,0
-Packets Sent,61046
-id,sw0,sw1,sw2,sw3,sw4,sw5,sw6,sw7,sw8
-Packets Received,61046,49952,49950,49948,49945,49943,49941,49938,49937
+Average Buffer Occupancy,5493.21164,2.589474,2.651163,2.606796,2.619266,2.623116,2.613402,2.688995,2.673267
+Id,s0
+Average Wait Time,18.00451
+Bytes per Second,199894.430554
+Id,0
+Packets Sent,60731
+Id,sw0,sw1,sw2,sw3,sw4,sw5,sw6,sw7,sw8
+Packets Received,60731,49886,49883,49880,49877,49874,49872,49869,49866
 Packets Dropped,0,0,0,0,0,0,0,0,0
 Loss Rate,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
-Average Buffer Occupancy,5607.846939,2.406417,2.452632,2.37931,2.41,2.369863,2.447917,2.363229,2.4375
-id,s0
-Average Wait Time,18.220994
-Bytes per Second,199913.605755
-id,0
-Packets Sent,60950
-id,sw0,sw1,sw2,sw3,sw4,sw5,sw6,sw7,sw8
-Packets Received,60950,49945,49942,49939,49936,49934,49932,49930,49928
+Average Buffer Occupancy,5493.21164,2.589474,2.651163,2.606796,2.619266,2.623116,2.613402,2.688995,2.673267
+Id,s0
+Average Wait Time,18.00451
+Bytes per Second,199894.430554
+Id,0
+Packets Sent,60686
+Id,sw0,sw1,sw2,sw3,sw4,sw5,sw6,sw7,sw8
+Packets Received,60686,49944,49941,49938,49935,49931,49929,49927,49925
 Packets Dropped,0,0,0,0,0,0,0,0,0
 Loss Rate,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
-Average Buffer Occupancy,5311.757322,2.547739,2.497462,2.426471,2.538835,2.451613,2.531707,2.56872,2.583784
-id,s0
-Average Wait Time,15.358862
-Bytes per Second,199912.434931
+Average Buffer Occupancy,5400.768844,2.490099,2.446809,2.463054,2.478448,2.406091,2.431925,2.434066,2.452736
+Id,s0
+Average Wait Time,15.004313
+Bytes per Second,199910.394964
