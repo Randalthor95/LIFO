@@ -3,7 +3,7 @@ import functools
 import random
 import simpy
 
-from DataGeneration import get_metrics, save_metrics
+from DataGeneration import print_metrics, save_metrics
 from SimComponents import PacketGenerator, PacketSink, SwitchPort, QueueType, PortMonitor, BurstyPacketGenerator
 
 switch_port_bit_rate = 200000 * 8
@@ -61,7 +61,7 @@ def test_complex_network(packet_generator_type, queue_type):
     packet_generators[8].out = switch_ports[4]
 
     env.run(until=time)
-    get_metrics(packet_generator_type, queue_type, packet_generators, packet_sink, switch_ports, port_monitors, time)
+    print_metrics(packet_generator_type, queue_type, packet_generators, packet_sink, switch_ports, port_monitors, time)
 
 
 def test_multihop_path(packet_generator_type, queue_type, num_switches):
@@ -92,7 +92,7 @@ def test_multihop_path(packet_generator_type, queue_type, num_switches):
     switch_ports[num_switches - 1].out = packet_sink
     # Wire packet generators and sinks together
     env.run(until=time)
-    get_metrics(packet_generator_type, queue_type, [packet_generator], packet_sink, switch_ports, port_monitors, time)
+    print_metrics(packet_generator_type, queue_type, [packet_generator], packet_sink, switch_ports, port_monitors, time)
 
 
 def test_one_generator_one_switch(packet_generator_type, queue_type):
@@ -111,8 +111,8 @@ def test_one_generator_one_switch(packet_generator_type, queue_type):
     switch_port.out = packet_sink
     port_monitor = PortMonitor(env, switch_port, port_monitor_sampling_distribution)
     env.run(until=time)
-    get_metrics(packet_generator_type, queue_type, [packet_generator], packet_sink, [switch_port], [port_monitor], time)
-    save_metrics('a ', packet_generator_type, queue_type, [packet_generator], packet_sink, [switch_port],
+    print_metrics(packet_generator_type, queue_type, [packet_generator], packet_sink, [switch_port], [port_monitor], time)
+    save_metrics('a ', 'One_Generator_One_Switch', packet_generator_type, queue_type, [packet_generator], packet_sink, [switch_port],
                  [port_monitor], time)
 
 
@@ -139,8 +139,8 @@ def test_one_of_each_generator_one_switch(queue_type):
     switch_port.out = packet_sink
     port_monitor = PortMonitor(env, switch_port, port_monitor_sampling_distribution)
     env.run(until=time)
-    get_metrics('One of Each Generator One Switch', queue_type, packet_generators, packet_sink, [switch_port],
-                [port_monitor], time)
+    print_metrics('One of Each Generator One Switch', queue_type, packet_generators, packet_sink, [switch_port],
+                  [port_monitor], time)
 
 
 def test_overloaded_switch(packet_generator_type, queue_type, num_nodes):
@@ -165,7 +165,7 @@ def test_overloaded_switch(packet_generator_type, queue_type, num_nodes):
     switch_port.out = packet_sink
     port_monitor = PortMonitor(env, switch_port, port_monitor_sampling_distribution)
     env.run(until=time)
-    get_metrics(packet_generator_type, queue_type, packet_generators, packet_sink, [switch_port], [port_monitor], time)
+    print_metrics(packet_generator_type, queue_type, packet_generators, packet_sink, [switch_port], [port_monitor], time)
 
 
 def test_two_good_one_bad(packet_generator_type, queue_type):
@@ -200,8 +200,8 @@ def test_two_good_one_bad(packet_generator_type, queue_type):
     switch_port.out = packet_sink
     port_monitor = PortMonitor(env, switch_port, port_monitor_sampling_distribution)
     env.run(until=time)
-    get_metrics('One of Each Generator One Switch', queue_type, packet_generators, packet_sink, [switch_port],
-                [port_monitor], time)
+    print_metrics('One of Each Generator One Switch', queue_type, packet_generators, packet_sink, [switch_port],
+                  [port_monitor], time)
 
 
 # Constant  ####################################################################################################
