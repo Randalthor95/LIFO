@@ -1,0 +1,30 @@
+id,0,1,2
+Packets Sent,47390,47002,47289
+id,sw0
+Packets Received,141681
+Packets Dropped,121559
+Loss Rate,0.857977
+Average Buffer Occupancy,4298.35122
+id,s0
+Average Wait Time,48.312129
+Bytes per Second,199991.918971
+id,0,1,2
+Packets Sent,47390,47002,47289
+id,sw0
+Packets Received,141681
+Packets Dropped,121559
+Loss Rate,0.857977
+Average Buffer Occupancy,4298.35122
+id,s0
+Average Wait Time,48.312129
+Bytes per Second,199991.918971
+id,0,1,2
+Packets Sent,46642,47139,47720
+id,sw0
+Packets Received,141501
+Packets Dropped,120868
+Loss Rate,0.854185
+Average Buffer Occupancy,3862.081633
+id,s0
+Average Wait Time,34.829575
+Bytes per Second,199996.103406

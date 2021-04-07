@@ -70,7 +70,15 @@ def test_complex_network(packet_generator_type, queue_type):
     packet_generators[8].out = switch_ports[4]
 
     env.run(until=time)
-    print_metrics(packet_generator_type, queue_type, packet_generators, packet_sink, switch_ports, port_monitors, time)
+    return NetworkComponents(packet_generators, packet_sink, switch_ports,
+                             port_monitors, time)
+
+
+def test_complex_network_all(packet_generator_type):
+    fifo_components = test_complex_network(packet_generator_type, QueueType.FIFO)
+    lifo_components = test_complex_network(packet_generator_type, QueueType.LIFO)
+    rando_components = test_complex_network(packet_generator_type, QueueType.RANDO)
+    save_metrics('Complex_Network', packet_generator_type, fifo_components, lifo_components, rando_components)
 
 
 def test_multihop_path(packet_generator_type, queue_type, num_switches):
@@ -101,7 +109,15 @@ def test_multihop_path(packet_generator_type, queue_type, num_switches):
     switch_ports[num_switches - 1].out = packet_sink
     # Wire packet generators and sinks together
     env.run(until=time)
-    print_metrics(packet_generator_type, queue_type, [packet_generator], packet_sink, switch_ports, port_monitors, time)
+    return NetworkComponents([packet_generator], packet_sink, switch_ports,
+                             port_monitors, time)
+
+
+def test_multihop_path_all(packet_generator_type, num_switches):
+    fifo_components = test_multihop_path(packet_generator_type, QueueType.FIFO, num_switches)
+    lifo_components = test_multihop_path(packet_generator_type, QueueType.LIFO, num_switches)
+    rando_components = test_multihop_path(packet_generator_type, QueueType.RANDO, num_switches)
+    save_metrics('Multi_Hop_Path', packet_generator_type, fifo_components, lifo_components, rando_components)
 
 
 def test_one_generator_one_switch(packet_generator_type, queue_type):
@@ -154,8 +170,16 @@ def test_one_of_each_generator_one_switch(queue_type):
     switch_port.out = packet_sink
     port_monitor = PortMonitor(env, switch_port, port_monitor_sampling_distribution)
     env.run(until=time)
-    print_metrics('One of Each Generator One Switch', queue_type, packet_generators, packet_sink, [switch_port],
-                  [port_monitor], time)
+    return NetworkComponents(packet_generators, packet_sink, [switch_port],
+                             [port_monitor], time)
+
+
+def test_one_of_each_generator_one_switch_all():
+    fifo_components = test_one_of_each_generator_one_switch(queue_type=QueueType.FIFO)
+    lifo_components = test_one_of_each_generator_one_switch(queue_type=QueueType.LIFO)
+    rando_components = test_one_of_each_generator_one_switch(queue_type=QueueType.RANDO)
+    save_metrics('One_of_Each_Generator_One_Switch', PacketGeneratorType.Constant, fifo_components, lifo_components,
+                 rando_components)
 
 
 def test_overloaded_switch(packet_generator_type, queue_type, num_nodes):
@@ -180,8 +204,15 @@ def test_overloaded_switch(packet_generator_type, queue_type, num_nodes):
     switch_port.out = packet_sink
     port_monitor = PortMonitor(env, switch_port, port_monitor_sampling_distribution)
     env.run(until=time)
-    print_metrics(packet_generator_type, queue_type, packet_generators, packet_sink, [switch_port], [port_monitor],
-                  time)
+    return NetworkComponents(packet_generators, packet_sink, [switch_port],
+                             [port_monitor], time)
+
+
+def test_overloaded_switch_all(packet_generator_type, num_nodes):
+    fifo_components = test_overloaded_switch(packet_generator_type, QueueType.FIFO, num_nodes)
+    lifo_components = test_overloaded_switch(packet_generator_type, QueueType.LIFO, num_nodes)
+    rando_components = test_overloaded_switch(packet_generator_type, QueueType.RANDO, num_nodes)
+    save_metrics('Overloaded_Switch', packet_generator_type, fifo_components, lifo_components, rando_components)
 
 
 def test_two_good_one_bad(packet_generator_type, queue_type):
@@ -216,8 +247,15 @@ def test_two_good_one_bad(packet_generator_type, queue_type):
     switch_port.out = packet_sink
     port_monitor = PortMonitor(env, switch_port, port_monitor_sampling_distribution)
     env.run(until=time)
-    print_metrics('One of Each Generator One Switch', queue_type, packet_generators, packet_sink, [switch_port],
-                  [port_monitor], time)
+    return NetworkComponents(packet_generators, packet_sink, [switch_port],
+                             [port_monitor], time)
+
+
+def test_two_good_one_bad_all(packet_generator_type):
+    fifo_components = test_two_good_one_bad(packet_generator_type, QueueType.FIFO)
+    lifo_components = test_two_good_one_bad(packet_generator_type, QueueType.LIFO)
+    rando_components = test_two_good_one_bad(packet_generator_type, QueueType.RANDO)
+    save_metrics('Two_Good_One_Bad', packet_generator_type, fifo_components, lifo_components, rando_components)
 
 
 # Constant  ####################################################################################################

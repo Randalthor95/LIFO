@@ -1,4 +1,7 @@
 from SimComponents import QueueType
-from StandardSimComponents import PacketGeneratorType, test_complex_network
+from StandardSimComponents import PacketGeneratorType, test_complex_network, test_complex_network_all
 
-test_complex_network(PacketGeneratorType.Normal, QueueType.FIFO)
+test_complex_network_all(PacketGeneratorType.Constant)
+test_complex_network_all(PacketGeneratorType.Bursty)
+test_complex_network_all(PacketGeneratorType.Normal)
+test_complex_network_all(PacketGeneratorType.Exponential)

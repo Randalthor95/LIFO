@@ -1,0 +1,30 @@
+id,0
+Packets Sent,61046
+id,sw0,sw1,sw2,sw3,sw4,sw5,sw6,sw7,sw8
+Packets Received,61046,49952,49950,49948,49945,49943,49941,49938,49937
+Packets Dropped,0,0,0,0,0,0,0,0,0
+Loss Rate,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
+Average Buffer Occupancy,5607.846939,2.406417,2.452632,2.37931,2.41,2.369863,2.447917,2.363229,2.4375
+id,s0
+Average Wait Time,18.220994
+Bytes per Second,199913.605755
+id,0
+Packets Sent,61046
+id,sw0,sw1,sw2,sw3,sw4,sw5,sw6,sw7,sw8
+Packets Received,61046,49952,49950,49948,49945,49943,49941,49938,49937
+Packets Dropped,0,0,0,0,0,0,0,0,0
+Loss Rate,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
+Average Buffer Occupancy,5607.846939,2.406417,2.452632,2.37931,2.41,2.369863,2.447917,2.363229,2.4375
+id,s0
+Average Wait Time,18.220994
+Bytes per Second,199913.605755
+id,0
+Packets Sent,60950
+id,sw0,sw1,sw2,sw3,sw4,sw5,sw6,sw7,sw8
+Packets Received,60950,49945,49942,49939,49936,49934,49932,49930,49928
+Packets Dropped,0,0,0,0,0,0,0,0,0
+Loss Rate,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
+Average Buffer Occupancy,5311.757322,2.547739,2.497462,2.426471,2.538835,2.451613,2.531707,2.56872,2.583784
+id,s0
+Average Wait Time,15.358862
+Bytes per Second,199912.434931

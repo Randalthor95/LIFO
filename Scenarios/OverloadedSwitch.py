@@ -1,4 +1,7 @@
 from SimComponents import QueueType
-from StandardSimComponents import test_overloaded_switch, PacketGeneratorType
+from StandardSimComponents import test_overloaded_switch, PacketGeneratorType, test_overloaded_switch_all
 
-test_overloaded_switch(PacketGeneratorType.Bursty, QueueType.FIFO, 8)
+test_overloaded_switch_all(PacketGeneratorType.Constant, 8)
+test_overloaded_switch_all(PacketGeneratorType.Bursty, 8)
+test_overloaded_switch_all(PacketGeneratorType.Normal, 8)
+test_overloaded_switch_all(PacketGeneratorType.Exponential, 8)
