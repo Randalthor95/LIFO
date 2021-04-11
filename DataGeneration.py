@@ -111,7 +111,7 @@ def save_metrics(network_name, packet_generator_type, fifo_components, lifo_comp
     for entry in fifo_data:
         data.append(entry)
 
-    lifo_data = format_metrics(network_name, packet_generator_type, fifo_components)
+    lifo_data = format_metrics(network_name, packet_generator_type, lifo_components)
     for entry in lifo_data:
         data.append(entry)
 
