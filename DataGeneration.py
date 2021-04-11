@@ -8,7 +8,7 @@ decimal_places = 6
 
 
 def print_metrics(network_name, queue_type, packet_generators, packet_sink, switch_ports, port_monitors, time):
-    print(network_name.name, queue_type.name)
+    print(network_name, queue_type.name)
     for packet_generator in packet_generators:
         print("packet_generator: {}, sent: {}".format(packet_generator.id, packet_generator.packets_sent))
     for switch_port in switch_ports:
@@ -45,6 +45,17 @@ def print_metrics(network_name, queue_type, packet_generators, packet_sink, swit
     # axis.set_ylabel("normalized frequency of occurrence")
     # # fig.savefig("ArrivalHistogram.png")
     # plt.show()
+    num = []
+    for i in range(len(packet_sink.arrivals)):
+        num.append(i)
+    print(packet_sink.arrivals)
+    print(num)
+    plt.plot(num, packet_sink.arrivals)
+    plt.title("Packets over Time")
+    plt.xlabel("Time")
+    plt.ylabel("Packet Size")
+    # fig.savefig("ArrivalHistogram.png")
+    plt.show()
 
 
 def format_metrics(network_name, packet_generator_type, components):
